@@ -33,6 +33,7 @@ class Game:
     def __init__(self, size_x=10, size_y=10):
         self.size_x = size_x
         self.size_y = size_y
+        self.img_window = 15
         self.grid = self.create_grid(size_y, size_x)
         self.basket = Basket(self)
         self.balls = []
@@ -102,3 +103,22 @@ class Game:
                 elif self.grid[j][i] == basket_symbol:
                     matrix[j, i] = 256
         return matrix
+    
+    def get_image(self):
+        matrix = np.zeros((self.size_x*self.img_window, self.size_y*self.img_window))
+        for i in range(0, self.size_x):
+            for j in range(0, self.size_y):
+                if self.grid[j][i] == empty_symbol:
+                    self._put_pixels(matrix, j, i, 0)
+                elif self.grid[j][i] == ball_symbol:
+                    self._put_pixels(matrix, j, i, 128)
+                elif self.grid[j][i] == basket_symbol:
+                    self._put_pixels(matrix, j, i, 256)
+        return matrix
+    
+    def _put_pixels(self, matrix, x, y, value):
+        for i in np.arange(0, self.img_window):
+            for j in np.arange(0, self.img_window):
+                matrix[x*self.img_window + i, y*self.img_window + j] = value
+
+    

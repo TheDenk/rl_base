@@ -7,7 +7,8 @@ import sys
 import numpy as np
 import random as rnd
 import time
-
+from PIL import Image
+import cv2
 
 def main(game, agent, show):
     game.create_ball()
@@ -19,6 +20,9 @@ def main(game, agent, show):
     balls, basket = game.tick(0, 0)
     state = np.squeeze(game.get_matrix())
 
+    #fourcc = cv2.VideoWriter_fourcc(*'MP4V')
+    #out = cv2.VideoWriter('output.mp4',fourcc, 10, (game.size_y*game.img_window, game.size_x*game.img_window))
+    
     while(1):
         if len(balls) == 0 or rnd.random()*3 < balls[0].y/game.size_y:
             game.create_ball()
@@ -32,6 +36,7 @@ def main(game, agent, show):
 
         state = np.squeeze(game.get_matrix())
         state = np.reshape(state, [1, game.size_y * game.size_x])
+        
         if show:
             agent.eps = 0.0
         action = agent.do_action(state=state)
@@ -70,8 +75,18 @@ def main(game, agent, show):
         if show:
             print('All balls:', all_balls, 'Scores: ', score, 'Game', int(steps/(game.size_y - 1)), 'eps', agent.eps)
             print('_'*25)
-            time.sleep(0.1)
+            time.sleep(0.05)
             if int(steps/game.size_y) == 20:
+                break
+            frame = game.get_image()
+            #rgbArray = np.zeros((frame.shape[1],frame.shape[0], 3), dtype=np.uint8)
+            #rgbArray[:,:,0] = frame
+            #rgbArray[:,:,1] = frame
+            #rgbArray[:,:,2] = frame
+            #out.write(rgbArray)
+            cv2.imshow('frame', frame)
+            
+            if cv2.waitKey(25) & 0xFF == ord('q'):
                 break
 
         if agent.eps <= agent.eps_min and not show:
@@ -82,7 +97,9 @@ def main(game, agent, show):
             all_balls = 0
         clear()
 
-
+    #out.release()   
+    cv2.destroyAllWindows()
+    
 if __name__ == '__main__':
     h, w = 12, 12
     agent = Agent()
@@ -94,5 +111,5 @@ if __name__ == '__main__':
     agent.load_model(agent.model_name + '.json', agent.model_name + '.h5')
     game = Game(h, w)
     main(game, agent, 1)
-
+    
 
